@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Double 3 WebRTC: Driver</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="A cool thing made with Glitch">
+    <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/style.css">
+    <script src="https://webrtchacks.github.io/adapter/adapter-latest.js"></script>
+    <!-- Load TensorFlow.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"> </script>
+    
+    <!-- Load the coco-ssd model to use to recognize things in images -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+    <script src="/driver_webrtc.js" type="module"></script>
+    <script src="/driver.js" type="module"></script>
+
+  </head>
+  <body>
+    <header>
+      <h1>D3 WebRTC Example: Driver</h1>
+      <p>This example shows how to orchestrate a WebRTC call on <a href="https://www.doublerobotics.com" target="_blank">Double 3</a> using a custom standby screen and the native WebRTC implementation that takes advantage of the hardware h264 encoder. Your robot must be in developer mode.</p>
+    </header>
+
+    <main>
+      <div id="localView" class="streams">
+        <video id="localVideo" autoplay muted></video>
+      </div>
+      <div id="remoteView" class="streams">
+        <video id="remoteVideo" autoplay muted style="width: 480px;"></video>
+        <canvas id="canvas" width="480" height="300"></canvas>
+      </div>
+      <ol>
+        <li>
+          Load custom robot Standby GUI from the Developer Monitor: <br>
+          <input type="text" value="" size="50" id="urlBox" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        </li>
+        
+        <li class="optional">
+          Optional:
+          <input type="button" value="Check for Robot" onclick="checkForRobot()">
+          &nbsp;<span id="robotAvailability"></span>
+        </li>
+
+        <li class="optional">
+          Optional:
+          <input type="button" value="List Local Webcams" onclick="listWebcams()">
+          <select id="cameras" onchange="updateLocalVideo()"></select>
+          <select id="mics" onchange="updateLocalVideo()"></select>
+          <input type="button" value="Clear" onclick="endLocalVideo()">
+        </li>
+
+        <li class="optional">
+          Optional:
+          <input type="button" value="Preheat" onclick="sendToServer({ type: 'preheat' })">
+          This turns the robot camera on, but without outputting any frames. It saves 1 or 2 seconds in the connecting process.
+        </li>
+
+        <li class="optional">
+          Optional: Set your own STUN/TURN servers (e.g. <a href="https://github.com/coturn/coturn" target="_blank">coturn</a>)<br>
+          <textarea id="iceConfig" rows="11" style="width: 500px;" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">{
+  "iceTransportPolicy": "all",
+  "iceServers": [
+    { "urls": [ "stun:rtc-oregon.doublerobotics.com:443" ] },
+    {
+      "urls": [ "turns:rtc-oregon.doublerobotics.com:443" ],
+      "username": "open",
+      "credential": "open"
+    }
+  ]
+}</textarea>
+        </li>
+
+        <li>
+          <input type="button" value="Call" onclick="startCall()">
+          <input type="button" value="Hang Up" onclick="endCall()">
+        </li>
+
+        <li class="optional">
+          Robot controls:
+          <a href="javascript:sendToServer({ type: 'poleStand' })">stand</a> |
+          <a href="javascript:sendToServer({ type: 'poleSit' })">sit</a> |
+          <a href="javascript:sendToServer({ type: 'poleStop' })">stop</a>
+          <a href="javascript:sendToServer({ type: 'enableNavigation' })">enable_navigation</a>
+          <a href="javascript:sendToServer({ type: 'disableNavigation' })">disable_navigation</a>
+          <a href="javascript:sendToServer({ type: 'navigateTarget', x: 0.4, y: 0 })">navigate_target</a>
+          <a href="javascript:sendToServer({ type: 'stopNavigation')">stop_navigation</a>
+        </li>
+
+      </ol>
+      <hr>
+      <div id="logs"></div>
+    </main>
+    
+    <footer>Made with <a href="https://glitch.com">Glitch</a>!</footer>
+
+    <!-- include the Glitch button to show what the webpage is about and
+          to make it easier for folks to view source and remix -->
+    <div class="glitchButton" style="position:fixed;top:2em;right:20px;"></div>
+    <script src="https://button.glitch.me/button.js"></script>
+    
+    <!-- Import the page's JavaScript to do some stuff -->
+    <!--<script src="/script.js"></script>-->
+  </body>
+</html>
